@@ -1,0 +1,63 @@
+From 687c622f51837ece1aeeec7d5f9943ebfedf26a6 Mon Sep 17 00:00:00 2001
+From: Bastian Cieslik <bastiancieslik@web.de>
+Date: Sat, 8 Mar 2025 08:40:08 +0100
+Subject: [PATCH] uwe5622: fix pathes
+
+---
+ drivers/net/wireless/uwe5622/Makefile           | 3 ++-
+ drivers/net/wireless/uwe5622/tty-sdio/Makefile  | 2 +-
+ drivers/net/wireless/uwe5622/unisocwcn/Makefile | 8 ++++----
+ 3 files changed, 7 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/net/wireless/uwe5622/Makefile b/drivers/net/wireless/uwe5622/Makefile
+index 313ea5123..2eb3d81af 100644
+--- a/drivers/net/wireless/uwe5622/Makefile
++++ b/drivers/net/wireless/uwe5622/Makefile
+@@ -2,7 +2,8 @@ obj-$(CONFIG_AW_WIFI_DEVICE_UWE5622) += unisocwcn/
+ obj-$(CONFIG_WLAN_UWE5622)    += unisocwifi/
+ obj-$(CONFIG_TTY_OVERY_SDIO)  += tty-sdio/
+ 
+-UNISOCWCN_DIR := $(shell cd $(src)/unisocwcn/ && /bin/pwd)
++mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
++UNISOCWCN_DIR := $(dir $(mkfile_path))/unisocwcn/
+ UNISOC_BSP_INCLUDE := $(UNISOCWCN_DIR)/include
+ export UNISOC_BSP_INCLUDE
+ 
+diff --git a/drivers/net/wireless/uwe5622/tty-sdio/Makefile b/drivers/net/wireless/uwe5622/tty-sdio/Makefile
+index df9be3f22..ee87d8f4f 100644
+--- a/drivers/net/wireless/uwe5622/tty-sdio/Makefile
++++ b/drivers/net/wireless/uwe5622/tty-sdio/Makefile
+@@ -1,6 +1,6 @@
+ # ccflags-y += -DDEBUG
+ # ccflags-y += -DKERNEL_VERSION_414
+-ccflags-y += -I$(srctree)/drivers/net/wireless/uwe5622/sprdwcn/include
++ccflags-y += -I$(srctree)/$(src)/sprdwcn/include
+ ccflags-y += -DOTT_UWE
+ ccflags-y += -DWOBLE_FUN
+ 
+diff --git a/drivers/net/wireless/uwe5622/unisocwcn/Makefile b/drivers/net/wireless/uwe5622/unisocwcn/Makefile
+index f9c595747..69fba408a 100644
+--- a/drivers/net/wireless/uwe5622/unisocwcn/Makefile
++++ b/drivers/net/wireless/uwe5622/unisocwcn/Makefile
+@@ -129,9 +129,9 @@ ccflags-y += -DCONFIG_WCN_BOOT
+ ccflags-y += -DCONFIG_WCN_UTILS
+ 
+ #### include path ######
+-ccflags-y += -I$(src)/include/
+-ccflags-y += -I$(src)/platform/
+-ccflags-y += -I$(src)/platform/rf/
++ccflags-y += -I$(srctree)/$(src)/include/
++ccflags-y += -I$(srctree)/$(src)/platform/
++ccflags-y += -I$(srctree)/$(src)/platform/rf/
+ 
+ #### add cflag for Customer ######
+ ### ---------- Hisilicon start ---------- ###
+@@ -405,7 +405,7 @@ KDIR ?= $(ANDROID_PRODUCT_OUT)/obj/KERNEL_OBJ
+ ARCH ?= arm
+ CROSS_COMPILE ?= arm-histbv310-linux-
+ 
+-EXTRA_CFLAGS += -I$(src)/include -D__linux__
++EXTRA_CFLAGS += -I$(srctree)/$(src)/include -D__linux__
+ 
+ all: $(all_dependencies)
+ 

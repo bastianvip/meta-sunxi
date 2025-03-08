@@ -15,6 +15,8 @@ SRC_URI:append:sunxi = " \
     file://0001-nanopi_neo_air_defconfig-Enable-eMMC-support.patch \
     file://0002-Added-nanopi-r1-board-support.patch \
     file://0003-sunxi-H6-Enable-Ethernet-on-Orange-Pi-One-Plus.patch \
+    file://0004-Support-opizero2w.patch \
+    file://opizero3-1.5GB-trim-from-u-boot-v2024.01.patch \
     file://boot.cmd \
 "
 

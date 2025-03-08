@@ -1,0 +1,867 @@
+From 1d34f5709fdaa79d87fb40dd31cb88210dd4471a Mon Sep 17 00:00:00 2001
+From: orangepi-xunlong <258384131@qq.com>
+Date: Mon, 19 Jun 2023 11:24:18 +0800
+Subject: [PATCH 49/57] arch: arm64: boot: dts: allwinner: overlay: Add some
+ overlays
+
+sun50i-h616-ir.dts
+sun50i-h616-pi-i2c0.dts
+sun50i-h616-pi-i2c1.dts
+sun50i-h616-pi-i2c2.dts
+sun50i-h616-pi-pwm1.dts
+sun50i-h616-pi-pwm2.dts
+sun50i-h616-pi-pwm3.dts
+sun50i-h616-pi-pwm4.dts
+sun50i-h616-pi-uart2.dts
+sun50i-h616-pi-uart3.dts
+sun50i-h616-pi-uart4.dts
+sun50i-h616-ph-i2c1.dts
+sun50i-h616-ph-i2c2.dts
+sun50i-h616-ph-i2c3.dts
+sun50i-h616-ph-i2c4.dts
+sun50i-h616-ph-pwm12.dts
+sun50i-h616-ph-pwm34.dts
+sun50i-h616-ph-uart2.dts
+sun50i-h616-ph-uart5.dts
+sun50i-h616-usb0-host.dts
+sun50i-h616-spi1-cs0-spidev.dts
+sun50i-h616-spi1-cs1-spidev.dts
+sun50i-h616-spi1-cs0-cs1-spidev.dts
+sun50i-h616-zero2w-disable-led.dts
+---
+ .../arm64/boot/dts/allwinner/overlay/Makefile | 35 +++++++++++-----
+ .../dts/allwinner/overlay/sun50i-h616-ir.dts  | 13 ++++++
+ ...-h616-i2c1.dts => sun50i-h616-ph-i2c1.dts} |  2 +
+ ...-h616-i2c2.dts => sun50i-h616-ph-i2c2.dts} |  4 +-
+ ...-h616-i2c3.dts => sun50i-h616-ph-i2c3.dts} |  2 +
+ ...-h616-i2c4.dts => sun50i-h616-ph-i2c4.dts} |  2 +
+ ...616-pwm12.dts => sun50i-h616-ph-pwm12.dts} |  0
+ ...616-pwm34.dts => sun50i-h616-ph-pwm34.dts} |  0
+ ...616-uart2.dts => sun50i-h616-ph-uart2.dts} |  2 +
+ ...616-uart5.dts => sun50i-h616-ph-uart5.dts} |  0
+ .../allwinner/overlay/sun50i-h616-pi-i2c0.dts | 30 ++++++++++++++
+ .../allwinner/overlay/sun50i-h616-pi-i2c1.dts | 13 ++++++
+ .../allwinner/overlay/sun50i-h616-pi-i2c2.dts | 22 ++++++++++
+ .../allwinner/overlay/sun50i-h616-pi-pwm1.dts | 19 +++++++++
+ .../allwinner/overlay/sun50i-h616-pi-pwm2.dts | 19 +++++++++
+ .../allwinner/overlay/sun50i-h616-pi-pwm3.dts | 19 +++++++++
+ .../allwinner/overlay/sun50i-h616-pi-pwm4.dts | 19 +++++++++
+ .../overlay/sun50i-h616-pi-uart2.dts          | 20 ++++++++++
+ .../overlay/sun50i-h616-pi-uart3.dts          | 20 ++++++++++
+ .../overlay/sun50i-h616-pi-uart4.dts          | 20 ++++++++++
+ .../sun50i-h616-spi1-cs0-cs1-spidev.dts       | 37 +++++++++++++++++
+ .../overlay/sun50i-h616-spi1-cs0-spidev.dts   | 29 ++++++++++++++
+ ...ev.dts => sun50i-h616-spi1-cs1-spidev.dts} |  5 ++-
+ .../overlay/sun50i-h616-usb0-host.dts         | 33 +++++++++++++++
+ .../sun50i-h616-zero2w-disable-led.dts        | 16 ++++++++
+ .../allwinner/sun50i-h616-orangepi-zero2w.dts |  4 +-
+ .../arm64/boot/dts/allwinner/sun50i-h616.dtsi | 40 +++++++++----------
+ 27 files changed, 390 insertions(+), 35 deletions(-)
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ir.dts
+ rename arch/arm64/boot/dts/allwinner/overlay/{sun50i-h616-i2c1.dts => sun50i-h616-ph-i2c1.dts} (86%)
+ rename arch/arm64/boot/dts/allwinner/overlay/{sun50i-h616-i2c2.dts => sun50i-h616-ph-i2c2.dts} (76%)
+ rename arch/arm64/boot/dts/allwinner/overlay/{sun50i-h616-i2c3.dts => sun50i-h616-ph-i2c3.dts} (76%)
+ rename arch/arm64/boot/dts/allwinner/overlay/{sun50i-h616-i2c4.dts => sun50i-h616-ph-i2c4.dts} (76%)
+ rename arch/arm64/boot/dts/allwinner/overlay/{sun50i-h616-pwm12.dts => sun50i-h616-ph-pwm12.dts} (100%)
+ rename arch/arm64/boot/dts/allwinner/overlay/{sun50i-h616-pwm34.dts => sun50i-h616-ph-pwm34.dts} (100%)
+ rename arch/arm64/boot/dts/allwinner/overlay/{sun50i-h616-uart2.dts => sun50i-h616-ph-uart2.dts} (77%)
+ rename arch/arm64/boot/dts/allwinner/overlay/{sun50i-h616-uart5.dts => sun50i-h616-ph-uart5.dts} (100%)
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-i2c0.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-i2c1.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-i2c2.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm1.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm2.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm3.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm4.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-uart2.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-uart3.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-uart4.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-cs0-cs1-spidev.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-cs0-spidev.dts
+ rename arch/arm64/boot/dts/allwinner/overlay/{sun50i-h616-spi1-spidev.dts => sun50i-h616-spi1-cs1-spidev.dts} (73%)
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-usb0-host.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-zero2w-disable-led.dts
+
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/Makefile b/arch/arm64/boot/dts/allwinner/overlay/Makefile
+index f3cb86102113..f7913a997031 100755
+--- a/arch/arm64/boot/dts/allwinner/overlay/Makefile
++++ b/arch/arm64/boot/dts/allwinner/overlay/Makefile
+@@ -1,18 +1,33 @@
+ # SPDX-License-Identifier: GPL-2.0
+ dtbo-$(CONFIG_ARCH_SUNXI) += \
++	sun50i-h616-ir.dtbo \
+ 	sun50i-h616-gpu.dtbo \
+-	sun50i-h616-uart2.dtbo \
+-	sun50i-h616-uart5.dtbo \
+-	sun50i-h616-i2c1.dtbo \
+-	sun50i-h616-i2c2.dtbo \
+-	sun50i-h616-i2c3.dtbo \
+-	sun50i-h616-i2c4.dtbo \
+-	sun50i-h616-pwm12.dtbo \
+-	sun50i-h616-pwm34.dtbo \
++	sun50i-h616-ph-uart2.dtbo \
++	sun50i-h616-ph-uart5.dtbo \
++	sun50i-h616-ph-i2c1.dtbo \
++	sun50i-h616-ph-i2c2.dtbo \
++	sun50i-h616-ph-i2c3.dtbo \
++	sun50i-h616-ph-i2c4.dtbo \
++	sun50i-h616-ph-pwm12.dtbo \
++	sun50i-h616-ph-pwm34.dtbo \
++	sun50i-h616-usb0-host.dtbo \
+ 	sun50i-h616-spi0-spidev.dtbo \
+-	sun50i-h616-spi1-spidev.dtbo \
++	sun50i-h616-spi1-cs0-spidev.dtbo \
++	sun50i-h616-spi1-cs1-spidev.dtbo \
++	sun50i-h616-spi1-cs0-cs1-spidev.dtbo \
+ 	sun50i-h616-disable-leds.dtbo \
+-	sun50i-h616-disable-uart0.dtbo
++	sun50i-h616-disable-uart0.dtbo \
++	sun50i-h616-zero2w-disable-led.dtbo \
++	sun50i-h616-pi-i2c0.dtbo \
++	sun50i-h616-pi-i2c1.dtbo \
++	sun50i-h616-pi-i2c2.dtbo \
++	sun50i-h616-pi-pwm1.dtbo \
++	sun50i-h616-pi-pwm2.dtbo \
++	sun50i-h616-pi-pwm3.dtbo \
++	sun50i-h616-pi-pwm4.dtbo \
++	sun50i-h616-pi-uart2.dtbo \
++	sun50i-h616-pi-uart3.dtbo \
++	sun50i-h616-pi-uart4.dtbo
+ 
+ scr-$(CONFIG_ARCH_SUNXI) += \
+ 	sun50i-h616-fixup.scr
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ir.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ir.dts
+new file mode 100755
+index 000000000000..34a5efc838a8
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ir.dts
+@@ -0,0 +1,13 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&ir>;
++		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&ir_rx_pin>;
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c1.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-i2c1.dts
+similarity index 86%
+rename from arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c1.dts
+rename to arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-i2c1.dts
+index 7d788c2fa701..b5beef5e3ac8 100755
+--- a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c1.dts
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-i2c1.dts
+@@ -13,6 +13,8 @@ __overlay__ {
+ 	fragment@1 {
+ 		target = <&i2c1>;
+ 		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&i2c1_ph_pins>;
+ 			status = "okay";
+ 		};
+ 	};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c2.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-i2c2.dts
+similarity index 76%
+rename from arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c2.dts
+rename to arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-i2c2.dts
+index febfdb8ff88d..689b405a13b0 100755
+--- a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c2.dts
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-i2c2.dts
+@@ -2,8 +2,6 @@
+ /plugin/;
+ 
+ / {
+-	compatible = "allwinner,sun50i-h616";
+-
+ 	fragment@0 {
+ 		target-path = "/aliases";
+ 		__overlay__ {
+@@ -14,6 +12,8 @@ __overlay__ {
+ 	fragment@1 {
+ 		target = <&i2c2>;
+ 		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&i2c2_ph_pins>;
+ 			status = "okay";
+ 		};
+ 	};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c3.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-i2c3.dts
+similarity index 76%
+rename from arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c3.dts
+rename to arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-i2c3.dts
+index c7fdb1559aa5..2c527f66d956 100755
+--- a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c3.dts
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-i2c3.dts
+@@ -12,6 +12,8 @@ __overlay__ {
+ 	fragment@1 {
+ 		target = <&i2c3>;
+ 		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&i2c3_ph_pins>;
+ 			status = "okay";
+ 		};
+ 	};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c4.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-i2c4.dts
+similarity index 76%
+rename from arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c4.dts
+rename to arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-i2c4.dts
+index 8cfdd67e0aaa..7aa932768664 100755
+--- a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c4.dts
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-i2c4.dts
+@@ -12,6 +12,8 @@ __overlay__ {
+ 	fragment@1 {
+ 		target = <&i2c4>;
+ 		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&i2c4_ph_pins>;
+ 			status = "okay";
+ 		};
+ 	};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pwm12.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-pwm12.dts
+similarity index 100%
+rename from arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pwm12.dts
+rename to arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-pwm12.dts
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pwm34.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-pwm34.dts
+similarity index 100%
+rename from arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pwm34.dts
+rename to arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-pwm34.dts
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-uart2.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-uart2.dts
+similarity index 77%
+rename from arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-uart2.dts
+rename to arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-uart2.dts
+index 56add56be033..497e039bb04d 100755
+--- a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-uart2.dts
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-uart2.dts
+@@ -12,6 +12,8 @@ __overlay__ {
+ 	fragment@1 {
+ 		target = <&uart2>;
+ 		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&uart2_ph_pins>;
+ 			status = "okay";
+ 		};
+ 	};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-uart5.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-uart5.dts
+similarity index 100%
+rename from arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-uart5.dts
+rename to arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-ph-uart5.dts
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-i2c0.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-i2c0.dts
+new file mode 100755
+index 000000000000..a4f08295a055
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-i2c0.dts
+@@ -0,0 +1,30 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			i2c0 = "/soc/i2c@5002000";
++			serial2 = "/soc/serial@5000800";
++		};
++	};
++
++	fragment@1 {
++		target = <&i2c0>;
++		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&i2c0_pi_pins>;
++			status = "okay";
++		};
++	};
++
++        fragment@2 {
++                target = <&uart2>;
++                __overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&uart2_pi_pins>;
++                        status = "disabled";
++                };
++        };
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-i2c1.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-i2c1.dts
+new file mode 100755
+index 000000000000..56f3abdf5609
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-i2c1.dts
+@@ -0,0 +1,13 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&i2c1>;
++		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&i2c1_pi_pins>;
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-i2c2.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-i2c2.dts
+new file mode 100755
+index 000000000000..b7dbd84f31f8
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-i2c2.dts
+@@ -0,0 +1,22 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&i2c2>;
++		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&i2c2_pi_pins>;
++			status = "okay";
++		};
++	};
++
++        fragment@1 {
++                target = <&uart3>;
++                __overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&uart3_pi_pins>;
++                        status = "disabled";
++                };
++        };
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm1.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm1.dts
+new file mode 100755
+index 000000000000..700600ff68a1
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm1.dts
+@@ -0,0 +1,19 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&pwm>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@1 {
++		target = <&pwm1>;
++		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&pwm1_pi_pin>;
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm2.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm2.dts
+new file mode 100755
+index 000000000000..b477df69f226
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm2.dts
+@@ -0,0 +1,19 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&pwm>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@1 {
++		target = <&pwm2>;
++		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&pwm2_pi_pin>;
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm3.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm3.dts
+new file mode 100755
+index 000000000000..a7758bf9f543
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm3.dts
+@@ -0,0 +1,19 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&pwm>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@1 {
++		target = <&pwm3>;
++		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&pwm3_pi_pin>;
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm4.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm4.dts
+new file mode 100755
+index 000000000000..71a3d943a65e
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-pwm4.dts
+@@ -0,0 +1,19 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&pwm>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@1 {
++		target = <&pwm4>;
++		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&pwm4_pi_pin>;
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-uart2.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-uart2.dts
+new file mode 100755
+index 000000000000..fb208b10a98b
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-uart2.dts
+@@ -0,0 +1,20 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			serial2 = "/soc/serial@5000800";
++		};
++	};
++
++	fragment@1 {
++		target = <&uart2>;
++		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&uart2_pi_pins>;
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-uart3.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-uart3.dts
+new file mode 100755
+index 000000000000..ce8007baab95
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-uart3.dts
+@@ -0,0 +1,20 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			serial2 = "/soc/serial@5000c00";
++		};
++	};
++
++	fragment@1 {
++		target = <&uart3>;
++		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&uart3_pi_pins>;
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-uart4.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-uart4.dts
+new file mode 100755
+index 000000000000..11a3c30adc26
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pi-uart4.dts
+@@ -0,0 +1,20 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			serial3 = "/soc/serial@5001000";
++		};
++	};
++
++	fragment@1 {
++		target = <&uart4>;
++		__overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&uart4_pi_pins>;
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-cs0-cs1-spidev.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-cs0-cs1-spidev.dts
+new file mode 100755
+index 000000000000..00e7a79ac2d2
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-cs0-cs1-spidev.dts
+@@ -0,0 +1,37 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			spi1 = "/soc/spi@5011000";
++		};
++	};
++
++	fragment@1 {
++		target = <&spi1>;
++		__overlay__ {
++			status = "okay";
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			pinctrl-names = "default";
++			pinctrl-0 = <&spi1_pins>, <&spi1_cs0_pin>, <&spi1_cs1_pin>;
++
++			spidev@0 {
++				compatible = "rohm,dh2228fv";
++				status = "okay";
++				reg = <0>;
++				spi-max-frequency = <50000000>;
++			};
++
++			spidev@1 {
++				compatible = "rohm,dh2228fv";
++				status = "okay";
++				reg = <1>;
++				spi-max-frequency = <50000000>;
++			};
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-cs0-spidev.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-cs0-spidev.dts
+new file mode 100755
+index 000000000000..d65d2e7ccc09
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-cs0-spidev.dts
+@@ -0,0 +1,29 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			spi1 = "/soc/spi@5011000";
++		};
++	};
++
++	fragment@1 {
++		target = <&spi1>;
++		__overlay__ {
++			status = "okay";
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++                        pinctrl-names = "default";
++                        pinctrl-0 = <&spi1_pins>, <&spi1_cs0_pin>;
++			spidev@0 {
++				compatible = "rohm,dh2228fv";
++				status = "okay";
++				reg = <0>;
++				spi-max-frequency = <1000000>;
++			};
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-spidev.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-cs1-spidev.dts
+similarity index 73%
+rename from arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-spidev.dts
+rename to arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-cs1-spidev.dts
+index 06ace2c48e40..ed64ed6cce83 100755
+--- a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-spidev.dts
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-cs1-spidev.dts
+@@ -9,12 +9,15 @@ __overlay__ {
+ 		};
+ 	};
+ 
+-	fragment@2 {
++	fragment@1 {
+ 		target = <&spi1>;
+ 		__overlay__ {
+ 			status = "okay";
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
++
++                        pinctrl-names = "default";
++                        pinctrl-0 = <&spi1_pins>, <&spi1_cs1_pin>;
+ 			spidev@1 {
+ 				compatible = "rohm,dh2228fv";
+ 				status = "okay";
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-usb0-host.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-usb0-host.dts
+new file mode 100755
+index 000000000000..1cc2a6d4db98
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-usb0-host.dts
+@@ -0,0 +1,33 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&usbotg>;
++		__overlay__ {
++			dr_mode = "host";
++			status = "okay";
++		};
++	};
++
++	fragment@1 {
++		target = <&usbphy>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@2 {
++		target = <&ehci0>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@3 {
++		target = <&ohci0>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-zero2w-disable-led.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-zero2w-disable-led.dts
+new file mode 100755
+index 000000000000..fdd7c2ca5ef0
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-zero2w-disable-led.dts
+@@ -0,0 +1,16 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&leds>;
++
++		__overlay__ {
++			status = "okay";
++
++			led-green {
++				linux,default-trigger = "none";
++			};
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero2w.dts b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero2w.dts
+index dd93f12ea8b6..9fbb2094ddaf 100755
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero2w.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero2w.dts
+@@ -287,13 +287,13 @@ &i2c2 {
+ 
+ &i2c3 {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&i2c3_pins>;
++	pinctrl-0 = <&i2c3_ph_pins>;
+ 	status = "disabled";
+ };
+ 
+ &i2c4 {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&i2c4_pins>;
++	pinctrl-0 = <&i2c4_ph_pins>;
+ 	status = "disabled";
+ };
+ 
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
+index d13c0c05a494..4b46c2c01182 100755
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
+@@ -302,25 +302,25 @@ pwm0: pwm0@0300a000 {
+ 		pwm1: pwm1@0300a000 {
+ 			compatible = "allwinner,sunxi-pwm1";
+ 			pinctrl-names = "default";
+-			pinctrl-0 = <&pwm1_pin>;
++			pinctrl-0 = <&pwm1_ph_pin>;
+ 		};
+ 
+ 		pwm2: pwm2@0300a000 {
+ 			compatible = "allwinner,sunxi-pwm2";
+ 			pinctrl-names = "default";
+-			pinctrl-0 = <&pwm2_pin>;
++			pinctrl-0 = <&pwm2_ph_pin>;
+ 		};
+ 
+ 		pwm3: pwm3@0300a000 {
+ 			compatible = "allwinner,sunxi-pwm3";
+ 			pinctrl-names = "default";
+-			pinctrl-0 = <&pwm3_pin>;
++			pinctrl-0 = <&pwm3_ph_pin>;
+ 		};
+ 
+ 		pwm4: pwm4@0300a000 {
+ 			compatible = "allwinner,sunxi-pwm4";
+ 			pinctrl-names = "default";
+-			pinctrl-0 = <&pwm4_pin>;
++			pinctrl-0 = <&pwm4_ph_pin>;
+ 		};
+ 
+ 		pwm5: pwm5@0300a000 {
+@@ -363,7 +363,7 @@ i2c0_pi_pins: i2c0-pi-pins {
+ 			};
+ 
+ 			/omit-if-no-ref/
+-			i2c1_pins: i2c1-pins {
++			i2c1_ph_pins: i2c1-ph-pins {
+ 				pins = "PH0", "PH1";
+ 				function = "i2c1";
+ 			};
+@@ -375,7 +375,7 @@ i2c1_pi_pins: i2c1-pi-pins {
+ 			};
+ 
+ 			/omit-if-no-ref/
+-			i2c2_pins: i2c2-pins {
++			i2c2_ph_pins: i2c2-ph-pins {
+ 				pins = "PH2", "PH3";
+ 				function = "i2c2";
+ 			};
+@@ -387,13 +387,13 @@ i2c2_pi_pins: i2c2-pi-pins {
+ 			};
+ 
+ 			/omit-if-no-ref/
+-			i2c3_pins: i2c3-pins {
++			i2c3_ph_pins: i2c3-ph-pins {
+ 				pins = "PH4", "PH5";
+ 				function = "i2c3";
+ 			};
+ 
+ 			/omit-if-no-ref/
+-			i2c4_pins: i2c4-pins {
++			i2c4_ph_pins: i2c4-ph-pins {
+ 				pins = "PH6", "PH7";
+ 				function = "i2c4";
+ 			};
+@@ -410,25 +410,25 @@ ir_rx_pin: ir-rx-pin {
+ 			};
+ 
+ 			/omit-if-no-ref/
+-			pwm1_pin: pwm1-pin {
++			pwm1_ph_pin: pwm1-ph-pin {
+ 				pins = "PH3";
+ 				function = "pwm1";
+ 			};
+ 
+ 			/omit-if-no-ref/
+-			pwm2_pin: pwm2-pin {
++			pwm2_ph_pin: pwm2-ph-pin {
+ 				pins = "PH2";
+ 				function = "pwm2";
+ 			};
+ 
+ 			/omit-if-no-ref/
+-			pwm3_pin: pwm3-pin {
++			pwm3_ph_pin: pwm3-ph-pin {
+ 				pins = "PH0";
+ 				function = "pwm3";
+ 			};
+ 
+ 			/omit-if-no-ref/
+-			pwm4_pin: pwm4-pin {
++			pwm4_ph_pin: pwm4-ph-pin {
+ 				pins = "PH1";
+ 				function = "pwm4";
+ 			};
+@@ -517,7 +517,7 @@ spi1_pins: spi1-pins {
+ 			/omit-if-no-ref/
+ 			spi1_cs0_pin: spi1-cs0-pin {
+ 				pins = "PH5";
+-				function = "spi0";
++				function = "spi1";
+ 			};
+ 
+ 			/omit-if-no-ref/
+@@ -532,13 +532,13 @@ uart0_ph_pins: uart0-ph-pins {
+ 			};
+ 
+ 			/omit-if-no-ref/
+-			uart1_pins: uart1-pins {
++			uart1_ph_pins: uart1-ph-pins {
+ 				pins = "PG6", "PG7";
+ 				function = "uart1";
+ 			};
+ 
+ 			/omit-if-no-ref/
+-			uart1_rts_cts_pins: uart1-rts-cts-pins {
++			uart1_ph_rts_cts_pins: uart1-ph-rts-cts-pins {
+ 				pins = "PG8", "PG9";
+ 				function = "uart1";
+ 			};
+@@ -550,7 +550,7 @@ uart2_ph_pins: uart2-ph-pins {
+ 			};
+ 
+ 			/omit-if-no-ref/
+-			uart2_rts_cts_pins: uart2-rts-cts-pins {
++			uart2_ph_rts_cts_pins: uart2-ph-rts-cts-pins {
+ 				pins = "PH7", "PH8";
+ 				function = "uart2";
+ 			};
+@@ -839,7 +839,7 @@ i2c1: i2c@5002400 {
+ 			clocks = <&ccu CLK_BUS_I2C1>;
+ 			resets = <&ccu RST_BUS_I2C1>;
+ 			pinctrl-names = "default";
+-			pinctrl-0 = <&i2c1_pins>;
++			pinctrl-0 = <&i2c1_ph_pins>;
+ 			status = "disabled";
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
+@@ -854,7 +854,7 @@ i2c2: i2c@5002800 {
+ 			clocks = <&ccu CLK_BUS_I2C2>;
+ 			resets = <&ccu RST_BUS_I2C2>;
+ 			pinctrl-names = "default";
+-			pinctrl-0 = <&i2c2_pins>;
++			pinctrl-0 = <&i2c2_ph_pins>;
+ 			status = "disabled";
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
+@@ -869,7 +869,7 @@ i2c3: i2c@5002c00 {
+ 			clocks = <&ccu CLK_BUS_I2C3>;
+ 			resets = <&ccu RST_BUS_I2C3>;
+ 			pinctrl-names = "default";
+-			pinctrl-0 = <&i2c3_pins>;
++			pinctrl-0 = <&i2c3_ph_pins>;
+ 			status = "disabled";
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
+@@ -884,7 +884,7 @@ i2c4: i2c@5003000 {
+ 			clocks = <&ccu CLK_BUS_I2C4>;
+ 			resets = <&ccu RST_BUS_I2C4>;
+ 			pinctrl-names = "default";
+-			pinctrl-0 = <&i2c4_pins>;
++			pinctrl-0 = <&i2c4_ph_pins>;
+ 			status = "disabled";
+ 			#address-cells = <1>;
+ 			#size-cells = <0>;
+-- 
+2.39.5
+

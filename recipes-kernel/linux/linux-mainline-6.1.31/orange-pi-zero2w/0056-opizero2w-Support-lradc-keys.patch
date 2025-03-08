@@ -1,0 +1,95 @@
+From 3495b5ee0594566c9fed930b96b1cae90600412e Mon Sep 17 00:00:00 2001
+From: orangepi-xunlong <258384131@qq.com>
+Date: Thu, 7 Sep 2023 16:42:56 +0800
+Subject: [PATCH 56/57] opizero2w: Support lradc keys
+
+---
+ .../allwinner/sun50i-h616-orangepi-zero2w.dts | 20 +++++++++++++++++++
+ .../arm64/boot/dts/allwinner/sun50i-h616.dtsi |  9 +++++++++
+ drivers/input/keyboard/sun4i-lradc-keys.c     |  8 ++++++++
+ 3 files changed, 37 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero2w.dts b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero2w.dts
+index 832d274fd905..27e817b379a4 100755
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero2w.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero2w.dts
+@@ -10,6 +10,7 @@
+ 
+ #include <dt-bindings/gpio/gpio.h>
+ #include <dt-bindings/interrupt-controller/arm-gic.h>
++#include <dt-bindings/input/input.h>
+ #include <dt-bindings/leds/common.h>
+ 
+ / {
+@@ -450,3 +451,22 @@ rmii_phy: ethernet-phy@1 {
+ 		reg = <1>;
+ 	};
+ };
++
++&r_lradc {
++	vref-supply = <&reg_aldo1>;
++	status = "okay";
++
++	button-500 {
++		label = "KEY_1";
++		linux,code = <KEY_1>;
++		channel = <0>;
++		voltage = <500000>;
++	};
++
++	button-800 {
++		label = "KEY_ENTER";
++		linux,code = <KEY_ENTER>;
++		channel = <0>;
++		voltage = <800000>;
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
+index a1a2bdc74780..2cd542d2a3ea 100755
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
+@@ -1419,6 +1419,15 @@ addr_mgt: addr-mgt {
+ 			type_addr_eth = <0x2>;
+ 			status = "okay";
+ 		};
++
++		r_lradc: lradc@5070800 {
++			compatible = "allwinner,sun50i-h616-lradc";
++			reg = <0x05070800 0x400>;
++			interrupts = <GIC_SPI 20 IRQ_TYPE_EDGE_RISING>;
++			clocks = <&ccu CLK_BUS_KEYADC>;
++			resets = <&ccu RST_BUS_KEYADC>;
++			status = "disabled";
++		};
+ 	};
+ 
+ 	thermal-zones {
+diff --git a/drivers/input/keyboard/sun4i-lradc-keys.c b/drivers/input/keyboard/sun4i-lradc-keys.c
+index 15c15c0958b0..ba952642fd00 100644
+--- a/drivers/input/keyboard/sun4i-lradc-keys.c
++++ b/drivers/input/keyboard/sun4i-lradc-keys.c
+@@ -86,6 +86,12 @@ static const struct lradc_variant lradc_variant_r329 = {
+ 	.has_clock_reset = true,
+ };
+ 
++static const struct lradc_variant lradc_variant_h616 = {
++	.divisor_numerator = 3,
++	.divisor_denominator = 4,
++	.has_clock_reset = true,
++};
++
+ struct sun4i_lradc_keymap {
+ 	u32 voltage;
+ 	u32 keycode;
+@@ -345,6 +351,8 @@ static const struct of_device_id sun4i_lradc_of_match[] = {
+ 		.data = &r_lradc_variant_a83t },
+ 	{ .compatible = "allwinner,sun50i-r329-lradc",
+ 		.data = &lradc_variant_r329 },
++	{ .compatible = "allwinner,sun50i-h616-lradc",
++		.data = &lradc_variant_h616 },
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, sun4i_lradc_of_match);
+-- 
+2.39.5
+

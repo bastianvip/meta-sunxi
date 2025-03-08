@@ -1,0 +1,227 @@
+From 0de22b96f3f9dd963a11d946190f619c8daf4c38 Mon Sep 17 00:00:00 2001
+From: Bastian Cieslik <bastiancieslik@web.de>
+Date: Sun, 9 Mar 2025 14:11:12 +0100
+Subject: [PATCH 1/2] backport-v6.9: thermal/drivers/sun8i: fix temperature
+ readings
+
+mainline commits:
+- bd0b451bd40fbe42d5d36e3740c489d503636d48
+- f8cfe02a53e6ca991a0325ec6925510ac5c8690f
+- f4318af40544b8e7ff5a6b667ede60e6cf808262
+  Which adds "allwinner,sram = <&syscon>;" to the h616 device tree.
+  Necessary for the thermal driver to find the sram device.
+
+The Allwinner H616 SoC needs to clear a bit in one register in the SRAM
+controller, to report reasonable temperature values. On reset, bit 16 in
+register 0x3000000 is set, which leads to the driver reporting
+temperatures around 200C. Clearing this bit brings the values down to the
+expected range. The BSP code does a one-time write in U-Boot, with a
+comment just mentioning the effect on the THS, but offering no further
+explanation.
+
+To not rely on firmware to set things up for us, add code that queries
+the SRAM controller device via a DT phandle link, then clear just this
+single bit.
+---
+ .../arm64/boot/dts/allwinner/sun50i-h616.dtsi |  1 +
+ drivers/soc/sunxi/sunxi_sram.c                | 22 +++++++
+ drivers/thermal/sun8i_thermal.c               | 60 +++++++++++++++++++
+ 3 files changed, 83 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
+index 2cd542d2a..ce35abe0d 100755
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
+@@ -1398,6 +1398,7 @@ sensor3 is located in DDR
+ 			resets = <&ccu RST_BUS_THS>;
+ 			nvmem-cells = <&ths_calibration>;
+ 			nvmem-cell-names = "calibration";
++      allwinner,sram = <&syscon>;
+ 			#thermal-sensor-cells = <1>;
+ 		};
+ 
+diff --git a/drivers/soc/sunxi/sunxi_sram.c b/drivers/soc/sunxi/sunxi_sram.c
+index 69c2685a2..5e6c79fec 100644
+--- a/drivers/soc/sunxi/sunxi_sram.c
++++ b/drivers/soc/sunxi/sunxi_sram.c
+@@ -294,6 +294,7 @@ EXPORT_SYMBOL(sunxi_sram_release);
+ struct sunxi_sramc_variant {
+ 	int num_emac_clocks;
+ 	bool has_ldo_ctrl;
++  bool has_ths_offset;
+ };
+ 
+ static const struct sunxi_sramc_variant sun4i_a10_sramc_variant = {
+@@ -315,8 +316,10 @@ static const struct sunxi_sramc_variant sun50i_a64_sramc_variant = {
+ 
+ static const struct sunxi_sramc_variant sun50i_h616_sramc_variant = {
+ 	.num_emac_clocks = 2,
++  .has_ths_offset = true,
+ };
+ 
++#define SUNXI_SRAM_THS_OFFSET_REG	0x0
+ #define SUNXI_SRAM_EMAC_CLOCK_REG	0x30
+ #define SUNXI_SYS_LDO_CTRL_REG		0x150
+ 
+@@ -325,6 +328,8 @@ static bool sunxi_sram_regmap_accessible_reg(struct device *dev,
+ {
+ 	const struct sunxi_sramc_variant *variant = dev_get_drvdata(dev);
+ 
++  if (reg == SUNXI_SRAM_THS_OFFSET_REG && variant->has_ths_offset)
++    return true;
+ 	if (reg >= SUNXI_SRAM_EMAC_CLOCK_REG &&
+ 	    reg <  SUNXI_SRAM_EMAC_CLOCK_REG + variant->num_emac_clocks * 4)
+ 		return true;
+@@ -334,6 +339,20 @@ static bool sunxi_sram_regmap_accessible_reg(struct device *dev,
+ 	return false;
+ }
+ 
++static void sunxi_sram_lock(void *_lock)
++{
++  spinlock_t *lock = _lock;
++
++  spin_lock(lock);
++}
++
++static void sunxi_sram_unlock(void *_lock)
++{
++  spinlock_t *lock = _lock;
++
++  spin_unlock(lock);
++}
++
+ static struct regmap_config sunxi_sram_regmap_config = {
+ 	.reg_bits       = 32,
+ 	.val_bits       = 32,
+@@ -343,6 +362,9 @@ static struct regmap_config sunxi_sram_regmap_config = {
+ 	/* other devices have no business accessing other registers */
+ 	.readable_reg	= sunxi_sram_regmap_accessible_reg,
+ 	.writeable_reg	= sunxi_sram_regmap_accessible_reg,
++  .lock     = sunxi_sram_lock,
++  .unlock		= sunxi_sram_unlock,
++  .lock_arg	= &sram_lock,
+ };
+ 
+ static int __init sunxi_sram_probe(struct platform_device *pdev)
+diff --git a/drivers/thermal/sun8i_thermal.c b/drivers/thermal/sun8i_thermal.c
+index c7f5d6a42..a5449e1c2 100644
+--- a/drivers/thermal/sun8i_thermal.c
++++ b/drivers/thermal/sun8i_thermal.c
+@@ -15,6 +15,7 @@
+ #include <linux/module.h>
+ #include <linux/nvmem-consumer.h>
+ #include <linux/of_device.h>
++#include <linux/of_platform.h>
+ #include <linux/platform_device.h>
+ #include <linux/regmap.h>
+ #include <linux/reset.h>
+@@ -67,6 +68,7 @@ struct tsensor {
+ struct ths_thermal_chip {
+ 	bool            has_mod_clk;
+ 	bool            has_bus_clk_reset;
++  bool		needs_sram;
+ 	int		sensor_num;
+ 	int		offset;
+ 	int		scale;
+@@ -84,12 +86,16 @@ struct ths_device {
+ 	const struct ths_thermal_chip		*chip;
+ 	struct device				*dev;
+ 	struct regmap				*regmap;
++  struct regmap_field			*sram_regmap_field;
+ 	struct reset_control			*reset;
+ 	struct clk				*bus_clk;
+ 	struct clk                              *mod_clk;
+ 	struct tsensor				sensor[MAX_SENSOR_NUM];
+ };
+ 
++/* The H616 needs to have a bit 16 in the SRAM control register cleared. */
++static const struct reg_field sun8i_ths_sram_reg_field = REG_FIELD(0x0, 16, 16);
++
+ /* Temp Unit: millidegree Celsius */
+ static int sun8i_ths_calc_temp(struct ths_device *tmdev,
+ 			       int id, int reg)
+@@ -383,6 +389,34 @@ static int sun8i_ths_calibrate(struct ths_device *tmdev)
+ 	return ret;
+ }
+ 
++static struct regmap *sun8i_ths_get_sram_regmap(struct device_node *node)
++{
++  struct device_node *sram_node;
++  struct platform_device *sram_pdev;
++  struct regmap *regmap = NULL;
++
++  sram_node = of_parse_phandle(node, "allwinner,sram", 0);
++  if (!sram_node)
++    return ERR_PTR(-ENODEV);
++
++  sram_pdev = of_find_device_by_node(sram_node);
++  if (!sram_pdev) {
++    /* platform device might not be probed yet */
++    regmap = ERR_PTR(-EPROBE_DEFER);
++    goto out_put_node;
++  }
++
++  /* If no regmap is found then the other device driver is at fault */
++  regmap = dev_get_regmap(&sram_pdev->dev, NULL);
++  if (!regmap)
++    regmap = ERR_PTR(-EINVAL);
++
++  platform_device_put(sram_pdev);
++out_put_node:
++  of_node_put(sram_node);
++  return regmap;
++}
++
+ static int sun8i_ths_resource_init(struct ths_device *tmdev)
+ {
+ 	struct device *dev = tmdev->dev;
+@@ -430,6 +464,25 @@ static int sun8i_ths_resource_init(struct ths_device *tmdev)
+ 	if (ret)
+ 		goto bus_disable;
+ 
++  if (tmdev->chip->needs_sram) {
++    struct regmap *regmap;
++
++    regmap = sun8i_ths_get_sram_regmap(dev->of_node);
++    if (IS_ERR(regmap)) {
++      ret = PTR_ERR(regmap);
++      dev_err(dev, "failed to get sram regmap %d\n", ret);
++      goto mod_disable;
++    }
++    tmdev->sram_regmap_field = devm_regmap_field_alloc(dev,
++                  regmap,
++                  sun8i_ths_sram_reg_field);
++    if (IS_ERR(tmdev->sram_regmap_field)) {
++      ret = PTR_ERR(tmdev->sram_regmap_field);
++      dev_err(dev, "failed to alloc regmap field %d\n", ret);
++      goto mod_disable;
++    }
++  }
++
+ 	ret = sun8i_ths_calibrate(tmdev);
+ 	if (ret)
+ 		goto mod_disable;
+@@ -528,6 +581,12 @@ static int sun50i_h616_thermal_init(struct ths_device *tmdev)
+ {
+ 	int val;
+ 
++  /* The H616 needs to have a bit in the SRAM control register cleared. */
++  if (tmdev->sram_regmap_field) {
++    if (regmap_field_write(tmdev->sram_regmap_field, 0))
++      dev_err(tmdev->dev, "failed to set reg[0x03000000] bit[16] to 0");
++  }
++
+ 	/*
+ 	 * For sun50iw9p1:
+ 	 * It is necessary that reg[0x03000000] bit[16] is 0.
+@@ -719,6 +778,7 @@ static const struct ths_thermal_chip sun50i_h6_ths = {
+ static const struct ths_thermal_chip sun50i_h616_ths = {
+ 	.sensor_num = 4,
+ 	.has_bus_clk_reset = true,
++  .needs_sram = true,
+ 	.ft_deviation = 8000,
+ 	.offset = -3255,
+ 	.scale = -81,
+-- 
+2.39.5
+

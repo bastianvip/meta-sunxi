@@ -1,0 +1,82 @@
+From 580b402223636e445259620cc3e44ca6b23bcb73 Mon Sep 17 00:00:00 2001
+From: orangepi-xunlong <258384131@qq.com>
+Date: Mon, 12 Jun 2023 17:06:35 +0800
+Subject: [PATCH 42/57] driver: net: phy: fix rtl8211e/f leds
+
+---
+ drivers/net/phy/realtek.c | 45 +++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 45 insertions(+)
+
+diff --git a/drivers/net/phy/realtek.c b/drivers/net/phy/realtek.c
+index 3d99fd6664d7..8480d4c765e4 100644
+--- a/drivers/net/phy/realtek.c
++++ b/drivers/net/phy/realtek.c
+@@ -72,6 +72,9 @@
+ #define RTL_GENERIC_PHYID			0x001cc800
+ #define RTL_8211FVD_PHYID			0x001cc878
+ 
++#define RTL_8211E_PHY_ID  0x001cc915
++#define RTL_8211F_PHY_ID  0x001cc916
++
+ MODULE_DESCRIPTION("Realtek PHY driver");
+ MODULE_AUTHOR("Johnson Leung");
+ MODULE_LICENSE("GPL");
+@@ -82,6 +85,39 @@ struct rtl821x_priv {
+ 	bool has_phycr2;
+ };
+ 
++static int phy_rtl8211e_led_fixup(struct phy_device *phydev)
++{
++	printk("%s in\n", __func__);
++
++	/*switch to extension page44*/
++	phy_write(phydev, 31, 0x07);
++
++	phy_write(phydev, 30, 0x2c);
++	phy_write(phydev, 26, 0x20);
++	phy_write(phydev, 28, 0x07);
++
++	/*switch back to page0*/
++	phy_write(phydev,31,0x00);
++
++	return 0;
++}
++
++static int phy_rtl8211f_led_fixup(struct phy_device *phydev)
++{
++	printk("%s in\n", __func__);
++
++	/*switch to extension page44*/
++	phy_write(phydev, 31, 0xd04);
++
++	phy_write(phydev, 16, 0xae00);
++	phy_write(phydev, 17, 0);
++
++	/*switch back to page0*/
++	phy_write(phydev,31,0x00);
++
++	return 0;
++}
++
+ static int rtl821x_read_page(struct phy_device *phydev)
+ {
+ 	return __phy_read(phydev, RTL821x_PAGE_SELECT);
+@@ -124,6 +160,15 @@ static int rtl821x_probe(struct phy_device *phydev)
+ 
+ 	phydev->priv = priv;
+ 
++	/* register the PHY board fixup */
++	ret = phy_register_fixup_for_uid(RTL_8211E_PHY_ID, 0xffffffff, phy_rtl8211e_led_fixup);
++	if (ret)
++		pr_warn("Cannot register PHY board fixup.\n");
++
++	ret = phy_register_fixup_for_uid(RTL_8211F_PHY_ID, 0xffffffff, phy_rtl8211f_led_fixup);
++	if (ret)
++		pr_warn("Cannot register PHY board fixup.\n");
++
+ 	return 0;
+ }
+ 
+-- 
+2.39.5
+

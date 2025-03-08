@@ -1,0 +1,573 @@
+From d79c17cf80f03210b2c51fcde28be3048930d3d3 Mon Sep 17 00:00:00 2001
+From: orangepi-xunlong <258384131@qq.com>
+Date: Wed, 7 Jun 2023 09:40:12 +0800
+Subject: [PATCH 28/57] arch: arm64: boot: dts: allwinner: overlays: Add
+ Overlays for h616/h618
+
+sun50i-h616-gpu.dts
+sun50i-h616-i2c1.dts
+sun50i-h616-i2c2.dts
+sun50i-h616-i2c3.dts
+sun50i-h616-i2c4.dts
+sun50i-h616-pwm12.dts
+sun50i-h616-pwm34.dts
+sun50i-h616-uart2.dts
+sun50i-h616-uart5.dts
+sun50i-h616-spi0-spidev.dts
+sun50i-h616-spi1-spidev.dts
+sun50i-h616-disable-leds.dts
+sun50i-h616-disable-uart0.dts
+---
+ arch/arm64/boot/dts/allwinner/Makefile        |   2 +
+ .../arm64/boot/dts/allwinner/overlay/Makefile |  23 ++++
+ .../overlay/sun50i-h616-disable-leds.dts      |  20 ++++
+ .../overlay/sun50i-h616-disable-uart0.dts     |  11 ++
+ .../allwinner/overlay/sun50i-h616-fixup.scr   | Bin 0 -> 4203 bytes
+ .../overlay/sun50i-h616-fixup.scr-cmd         | 110 ++++++++++++++++++
+ .../dts/allwinner/overlay/sun50i-h616-gpu.dts |  11 ++
+ .../allwinner/overlay/sun50i-h616-i2c1.dts    |  26 +++++
+ .../allwinner/overlay/sun50i-h616-i2c2.dts    |  20 ++++
+ .../allwinner/overlay/sun50i-h616-i2c3.dts    |  18 +++
+ .../allwinner/overlay/sun50i-h616-i2c4.dts    |  18 +++
+ .../allwinner/overlay/sun50i-h616-pwm12.dts   |  11 ++
+ .../allwinner/overlay/sun50i-h616-pwm34.dts   |  18 +++
+ .../overlay/sun50i-h616-spi0-spidev.dts       |  34 ++++++
+ .../overlay/sun50i-h616-spi1-spidev.dts       |  26 +++++
+ .../allwinner/overlay/sun50i-h616-uart2.dts   |  18 +++
+ .../allwinner/overlay/sun50i-h616-uart5.dts   |  20 ++++
+ 17 files changed, 386 insertions(+)
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/Makefile
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-disable-leds.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-disable-uart0.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-fixup.scr
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-fixup.scr-cmd
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-gpu.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c1.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c2.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c3.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c4.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pwm12.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pwm34.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi0-spidev.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-spidev.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-uart2.dts
+ create mode 100755 arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-uart5.dts
+
+diff --git a/arch/arm64/boot/dts/allwinner/Makefile b/arch/arm64/boot/dts/allwinner/Makefile
+index 62793f832209..a6a0f1dd0085 100644
+--- a/arch/arm64/boot/dts/allwinner/Makefile
++++ b/arch/arm64/boot/dts/allwinner/Makefile
+@@ -41,3 +41,5 @@ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h6-tanix-tx6-mini.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h616-orangepi-zero2.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h616-orangepi-zero3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h616-x96-mate.dtb
++
++subdir-y        := $(dts-dirs) overlay
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/Makefile b/arch/arm64/boot/dts/allwinner/overlay/Makefile
+new file mode 100755
+index 000000000000..f3cb86102113
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/Makefile
+@@ -0,0 +1,23 @@
++# SPDX-License-Identifier: GPL-2.0
++dtbo-$(CONFIG_ARCH_SUNXI) += \
++	sun50i-h616-gpu.dtbo \
++	sun50i-h616-uart2.dtbo \
++	sun50i-h616-uart5.dtbo \
++	sun50i-h616-i2c1.dtbo \
++	sun50i-h616-i2c2.dtbo \
++	sun50i-h616-i2c3.dtbo \
++	sun50i-h616-i2c4.dtbo \
++	sun50i-h616-pwm12.dtbo \
++	sun50i-h616-pwm34.dtbo \
++	sun50i-h616-spi0-spidev.dtbo \
++	sun50i-h616-spi1-spidev.dtbo \
++	sun50i-h616-disable-leds.dtbo \
++	sun50i-h616-disable-uart0.dtbo
++
++scr-$(CONFIG_ARCH_SUNXI) += \
++	sun50i-h616-fixup.scr
++
++targets += $(dtbo-y) $(scr-y) $(dtbotxt-y)
++
++always		:= $(dtbo-y) $(scr-y) $(dtbotxt-y)
++clean-files	:= *.dtbo *.scr
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-disable-leds.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-disable-leds.dts
+new file mode 100755
+index 000000000000..115d2901fd15
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-disable-leds.dts
+@@ -0,0 +1,20 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&leds>;
++
++		__overlay__ {
++			status = "okay";
++
++			led-red {
++				linux,default-trigger = "none";
++			};
++
++			led-green {
++				linux,default-trigger = "none";
++			};
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-disable-uart0.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-disable-uart0.dts
+new file mode 100755
+index 000000000000..3c827cac9ab3
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-disable-uart0.dts
+@@ -0,0 +1,11 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&uart0>;
++		 __overlay__ {
++			status = "disabled";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-fixup.scr b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-fixup.scr
+new file mode 100755
+index 0000000000000000000000000000000000000000..4cd5ac726f87cc5321e4a1c761a3a349d02cf0eb
+GIT binary patch
+literal 4203
+zcmc&$&2HO95cVYn#8XZMdK=J2Y$G8=N=_TpN#P(xlN<^J2+&*v5G!&i5vG>R?ozT~
+z3w?yXKyQ7TzC>T3w?08<_$QK~6sd9%T_lP#-_Fc8^X;5I_~w`2{`}`}|JT2MKRSB&
+z_^9{<$;Uq)eEn7VxaIrdF}*y7c+O?SmI{LKCQU$jGEB5_4B;$^_>2p!;4GFPnVxb9
+zDjh2w>Qr-eUb+I4lQg#sQsL<^7Ay+&5<yZGiV39FIF5Azjek4=F6N<(1v$Z-$&igB
+zu7C+2%)r+sc=2q8PX<CLuK7(O0Z-H}+QP}Lo+a*>iR%?u@DfcHvAk9gi)aY}hC1ap
+zAkx{GOAP&`_0zdw5QvzA&k;C@6?c<Rz-a|t;8Av9zB_w$_xkS5-P`lg$bW2tIT|_U
+zWd@POfyU&W+m1%>&&ce&vZFY`tOaSp3ou`q@aR#N3x-j~4}(ji+x&H>`M0MV%-?jH
+zf42$!ZKwIOOT!3*tj=HwN+DsA&0K}q#*)6=ajI74C158AqgO`WZAD4j?Q;kt!A1fT
+ze_cJb9UDL9E>O;Ap$H41uzje^&{wh7&siu>U4ha}rwYvYnk_$L+efb;VrqJ2x81fB
+zX~u5cK=P04Ds2s@aYzzc=x&jF%7wQC^LdMc3jGHPJ~Vn|Bwbv2NEMNQy;~5rb10He
+z@NlO*C7+xKM=0yuvYZA+u&H5uKHs5X8dirj%qLJ^q+u|M9h-&Xt?1mHq3nR|jnY6a
+zDeP(#G9)hlL!(d_2R2EPD3a0jpcE2aX=ByXm8H?E*^mTxnaET$Wxgc|=;vt}T@7t}
+zjEd1O&=uedREBcmYKM}dOi)qgEK2hUNTzr<MLgG-79bQaYsVrMipV4hV>|$7no=yR
+zR*l=Nc!gB~o0w}29;IBBrv}m(#6|`Iiz2*lUG7hKTMa6q%)?_!ajC7s!y=CimoC%*
+z@Z^)*a#L7cf*&`;C&<B*#cX)7Zsvk5y8CfMP_Ez$FfpwjVd6hIYWccA?bSsMjdEl!
+z7AlVT3$2&$?I(`&bbw-C=~}PHy=e^Q2POrk`#t;^D%>b&^~fA>oygq5Cjw*KK4{<Y
+z;oXOyhuPABKQ78`h63#INOAfuJFW~e&*9{@{!AQZfszBMa?g(idAIVX=4$xmBAyv{
+z>gdARaY9PN%>%Nw*mpj1&-Qq%@eZC2tkoiv{0mG-o`f3;?IvjyrOCz-p<SXi=l!xU
+z<B%zf{H-+Up2U<%?YL4aPk(YJZ!DkFsV@Bt%gVH>AvB!=HQ0uM@mLs82Nw2i?ud#I
+zvIzGy+rF@EQb>|cORyO(>!!~GmPWX&SHEhSM-|)PZns6yS!LH$eR131>a<-4nQL1o
+zb9r_$u`H@I*i6mf9;q30lyhHd2G)MmJUfh<y8E8g)Ls7<YKHen&F~(m8SY7qcNjHw
+M_dThpyB<i*zZDL3*8l(j
+
+literal 0
+HcmV?d00001
+
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-fixup.scr-cmd b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-fixup.scr-cmd
+new file mode 100755
+index 000000000000..2bde77cb082d
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-fixup.scr-cmd
+@@ -0,0 +1,110 @@
++# overlays fixup script
++# implements (or rather substitutes) overlay arguments functionality
++# using u-boot scripting, environment variables and "fdt" command
++
++# setexpr test_var ${tmp_bank} - A
++# works only for hex numbers (A-F)
++
++setenv decompose_pin 'setexpr tmp_bank sub "P(C|G|H|I)\\d+" "\\1";
++setexpr tmp_pin sub "P\\S(\\d+)" "\\1";
++test "${tmp_bank}" = "C" && setenv tmp_bank 2;
++test "${tmp_bank}" = "G" && setenv tmp_bank 6'
++test "${tmp_bank}" = "H" && setenv tmp_bank 7;
++test "${tmp_bank}" = "I" && setenv tmp_bank 8;
++
++if test -n "${param_spinor_spi_bus}"; then
++	test "${param_spinor_spi_bus}" = "0" && setenv tmp_spi_path "spi@5010000"
++	test "${param_spinor_spi_bus}" = "1" && setenv tmp_spi_path "spi@5011000"
++	fdt set /soc/${tmp_spi_path} status "okay"
++	fdt set /soc/${tmp_spi_path}/spiflash@0 status "okay"
++	if test -n "${param_spinor_max_freq}"; then
++		fdt set /soc/${tmp_spi_path}/spiflash@0 spi-max-frequency "<${param_spinor_max_freq}>"
++	fi
++	if test "${param_spinor_spi_cs}" = "1"; then
++		fdt set /soc/${tmp_spi_path}/spiflash@0 reg "<1>"
++	fi
++	env delete tmp_spi_path
++fi
++
++if test -n "${param_spidev_spi_bus}"; then
++	test "${param_spidev_spi_bus}" = "0" && setenv tmp_spi_path "spi@5010000"
++	test "${param_spidev_spi_bus}" = "1" && setenv tmp_spi_path "spi@5011000"
++	fdt set /soc/${tmp_spi_path} status "okay"
++	fdt set /soc/${tmp_spi_path}/spidev status "okay"
++	if test -n "${param_spidev_max_freq}"; then
++		fdt set /soc/${tmp_spi_path}/spidev spi-max-frequency "<${param_spidev_max_freq}>"
++	fi
++	if test "${param_spidev_spi_cs}" = "1"; then
++		fdt set /soc/${tmp_spi_path}/spidev reg "<1>"
++	fi
++	env delete tmp_spi_path
++fi
++
++if test -n "${param_pps_pin}"; then
++	setenv tmp_bank "${param_pps_pin}"
++	setenv tmp_pin "${param_pps_pin}"
++	run decompose_pin
++	fdt set /soc/pinctrl@300b000/pps_pins pins "${param_pps_pin}"
++	fdt get value tmp_phandle /soc/pinctrl@300b000 phandle
++	fdt set /pps@0 gpios "<${tmp_phandle} ${tmp_bank} ${tmp_pin} 0>"
++	env delete tmp_pin tmp_bank tmp_phandle
++fi
++
++if test "${param_pps_falling_edge}" = "1"; then
++	fdt set /pps@0 assert-falling-edge
++fi
++
++for f in ${overlays}; do
++	if test "${f}" = "pwm34"; then
++		setenv bootargs_new ""
++		for arg in ${bootargs}; do
++			if test "${arg}" = "console=ttyS0,115200"; then
++				echo "Warning: Disabling ttyS0 console due to enabled PWM3 and PWM4 overlay"
++			else
++				setenv bootargs_new "${bootargs_new} ${arg}"
++			fi
++		done
++		setenv bootargs "${bootargs_new}"
++	fi
++done
++
++if test -n "${param_w1_pin}"; then
++	setenv tmp_bank "${param_w1_pin}"
++	setenv tmp_pin "${param_w1_pin}"
++	run decompose_pin
++	fdt set /soc/pinctrl@300b000/w1_pins pins "${param_w1_pin}"
++	fdt get value tmp_phandle /soc/pinctrl@300b000 phandle
++	fdt set /onewire@0 gpios "<${tmp_phandle} ${tmp_bank} ${tmp_pin} 0>"
++	env delete tmp_pin tmp_bank tmp_phandle
++fi
++
++if test "${param_w1_pin_int_pullup}" = "1"; then
++	fdt set /soc/pinctrl@300b000/w1_pins bias-pull-up
++fi
++
++if test "${param_uart1_rtscts}" = "1"; then
++	fdt get value tmp_phandle1 /soc/pinctrl@300b000/uart1-pins phandle
++	fdt get value tmp_phandle2 /soc/pinctrl@300b000/uart1-rts-cts-pins phandle
++	fdt set /soc/serial@5000400 pinctrl-names "default" "default"
++	fdt set /soc/serial@5000400 pinctrl-0 "<${tmp_phandle1}>"
++	fdt set /soc/serial@5000400 pinctrl-1 "<${tmp_phandle2}>"
++	env delete tmp_phandle1 tmp_phandle2
++fi
++
++if test "${param_uart2_rtscts}" = "1"; then
++	fdt get value tmp_phandle1 /soc/pinctrl@300b000/uart2-pins phandle
++	fdt get value tmp_phandle2 /soc/pinctrl@300b000/uart2-rts-cts-pins phandle
++	fdt set /soc/serial@5000800 pinctrl-names "default" "default"
++	fdt set /soc/serial@5000800 pinctrl-0 "<${tmp_phandle1}>"
++	fdt set /soc/serial@5000800 pinctrl-1 "<${tmp_phandle2}>"
++	env delete tmp_phandle1 tmp_phandle2
++fi
++
++if test "${param_uart3_rtscts}" = "1"; then
++	fdt get value tmp_phandle1 /soc/pinctrl@300b000/uart3-pins phandle
++	fdt get value tmp_phandle2 /soc/pinctrl@300b000/uart3-rts-cts-pins phandle
++	fdt set /soc/serial@5000c00 pinctrl-names "default" "default"
++	fdt set /soc/serial@5000c00 pinctrl-0 "<${tmp_phandle1}>"
++	fdt set /soc/serial@5000c00 pinctrl-1 "<${tmp_phandle2}>"
++	env delete tmp_phandle1 tmp_phandle2
++fi
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-gpu.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-gpu.dts
+new file mode 100755
+index 000000000000..5d404588c505
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-gpu.dts
+@@ -0,0 +1,11 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&gpu>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c1.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c1.dts
+new file mode 100755
+index 000000000000..7d788c2fa701
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c1.dts
+@@ -0,0 +1,26 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			i2c1 = "/soc/i2c@5002400";
++			serial2 = "/soc/serial@5000800";
++		};
++	};
++
++	fragment@1 {
++		target = <&i2c1>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++        fragment@2 {
++                target = <&uart0>;
++                __overlay__ {
++                        status = "disabled";
++                };
++        };
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c2.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c2.dts
+new file mode 100755
+index 000000000000..febfdb8ff88d
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c2.dts
+@@ -0,0 +1,20 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	compatible = "allwinner,sun50i-h616";
++
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			i2c2 = "/soc/i2c@5002800";
++		};
++	};
++
++	fragment@1 {
++		target = <&i2c2>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c3.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c3.dts
+new file mode 100755
+index 000000000000..c7fdb1559aa5
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c3.dts
+@@ -0,0 +1,18 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			i2c3 = "/soc/i2c@5002c00";
++		};
++	};
++
++	fragment@1 {
++		target = <&i2c3>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c4.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c4.dts
+new file mode 100755
+index 000000000000..8cfdd67e0aaa
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-i2c4.dts
+@@ -0,0 +1,18 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			i2c4 = "/soc/i2c@5003000";
++		};
++	};
++
++	fragment@1 {
++		target = <&i2c4>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pwm12.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pwm12.dts
+new file mode 100755
+index 000000000000..377d146a4f92
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pwm12.dts
+@@ -0,0 +1,11 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&pwm>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pwm34.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pwm34.dts
+new file mode 100755
+index 000000000000..097cfcf7c61b
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-pwm34.dts
+@@ -0,0 +1,18 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&uart0>;
++		 __overlay__ {
++			status = "disabled";
++		};
++	};
++
++	fragment@1 {
++		target = <&pwm>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi0-spidev.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi0-spidev.dts
+new file mode 100755
+index 000000000000..d76fb6442dee
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi0-spidev.dts
+@@ -0,0 +1,34 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			spi0 = "/soc/spi@5010000";
++		};
++	};
++
++	fragment@1 {
++		target = <&spi0>;
++		__overlay__ {
++			#address-cells = <1>;
++			#size-cells = <0>;
++			spidev@0 {
++				compatible = "rohm,dh2228fv";
++				status = "okay";
++				reg = <0>;
++				spi-max-frequency = <1000000>;
++			};
++		};
++	};
++
++	fragment@2 {
++		target = <&spi0>;
++		__overlay__ {
++			flash@0 {
++				status = "disabled";
++			};
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-spidev.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-spidev.dts
+new file mode 100755
+index 000000000000..06ace2c48e40
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-spi1-spidev.dts
+@@ -0,0 +1,26 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			spi1 = "/soc/spi@5011000";
++		};
++	};
++
++	fragment@2 {
++		target = <&spi1>;
++		__overlay__ {
++			status = "okay";
++			#address-cells = <1>;
++			#size-cells = <0>;
++			spidev@1 {
++				compatible = "rohm,dh2228fv";
++				status = "okay";
++				reg = <1>;
++				spi-max-frequency = <1000000>;
++			};
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-uart2.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-uart2.dts
+new file mode 100755
+index 000000000000..56add56be033
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-uart2.dts
+@@ -0,0 +1,18 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			serial2 = "/soc/serial@5000800";
++		};
++	};
++
++	fragment@1 {
++		target = <&uart2>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-uart5.dts b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-uart5.dts
+new file mode 100755
+index 000000000000..9f0c16c32902
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/overlay/sun50i-h616-uart5.dts
+@@ -0,0 +1,20 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			serial5 = "/soc/serial@5001400";
++		};
++	};
++
++	fragment@1 {
++		target = <&uart5>;
++		 __overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&uart5_ph_pins>;
++			status = "okay";
++		};
++	};
++};
+-- 
+2.39.5
+

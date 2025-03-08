@@ -1,0 +1,26 @@
+From c620565989bfd561a928814f84a1ab91bad9e224 Mon Sep 17 00:00:00 2001
+From: Bastian Cieslik <bastiancieslik@web.de>
+Date: Tue, 11 Mar 2025 21:27:58 +0100
+Subject: [PATCH 2/2] fix "Waiting for rootfs on /dev/mmcblk0p1"
+
+---
+ arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
+index 27e817b37..479ecfee9 100755
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
+@@ -24,6 +24,9 @@ aliases {
+ 		serial4 = &uart4;
+ 		serial5 = &uart5;
+ 		ethernet0 = &emac1;
++    mmc0 = &mmc0;
++    mmc1 = &mmc1;
++    mmc2 = &mmc2;
+ 	};
+ 
+ 	chosen {
+-- 
+2.39.5
+

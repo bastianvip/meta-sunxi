@@ -1,0 +1,26 @@
+From bb1c7fe7b91655d0d980c8e61158628dd42f407f Mon Sep 17 00:00:00 2001
+From: orangepi-xunlong <258384131@qq.com>
+Date: Wed, 28 Jun 2023 13:35:12 +0800
+Subject: [PATCH 50/57] mtd: spi-nor: Support zb25vq128a 16mb spiflash
+
+---
+ drivers/mtd/spi-nor/xmc.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/mtd/spi-nor/xmc.c b/drivers/mtd/spi-nor/xmc.c
+index 051411e86339..30da07542b69 100644
+--- a/drivers/mtd/spi-nor/xmc.c
++++ b/drivers/mtd/spi-nor/xmc.c
+@@ -16,6 +16,9 @@ static const struct flash_info xmc_nor_parts[] = {
+ 	{ "XM25QH128A", INFO(0x207018, 0, 64 * 1024, 256)
+ 		NO_SFDP_FLAGS(SECT_4K | SPI_NOR_DUAL_READ |
+ 			      SPI_NOR_QUAD_READ) },
++	{ "ZB25VQ128A", INFO(0x5e4018, 0, 64 * 1024, 256)
++		NO_SFDP_FLAGS(SECT_4K | SPI_NOR_DUAL_READ |
++			      SPI_NOR_QUAD_READ) },
+ };
+ 
+ const struct spi_nor_manufacturer spi_nor_xmc = {
+-- 
+2.39.5
+

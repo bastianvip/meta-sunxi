@@ -1,0 +1,123 @@
+From 5fbfe05d1b901aa4ef9892fc971c06ca3909da87 Mon Sep 17 00:00:00 2001
+From: orangepi-xunlong <258384131@qq.com>
+Date: Wed, 6 Sep 2023 19:08:11 +0800
+Subject: [PATCH 55/57] mfd: axp313a: Support powerkey
+
+---
+ .../allwinner/sun50i-h616-orangepi-zero2w.dts |  5 +++
+ drivers/mfd/axp20x.c                          | 34 +++++++++++++++++--
+ include/linux/mfd/axp20x.h                    |  2 ++
+ 3 files changed, 38 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero2w.dts b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero2w.dts
+index f8f1b9c6c607..832d274fd905 100755
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero2w.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero2w.dts
+@@ -162,6 +162,11 @@ axp313a: pmic@36 {
+ 		reg = <0x36>;
+ 		wakeup-source;
+ 
++		interrupt-parent = <&pio>;
++		interrupts = <2 9 IRQ_TYPE_LEVEL_LOW>; /* PC9 */
++		interrupt-controller;
++		#interrupt-cells = <1>;
++
+ 		regulators{
+ 			reg_dcdc1: dcdc1 {
+ 				regulator-name = "axp313a-dcdc1";
+diff --git a/drivers/mfd/axp20x.c b/drivers/mfd/axp20x.c
+index dbf1d6321dc1..21b239d33d62 100644
+--- a/drivers/mfd/axp20x.c
++++ b/drivers/mfd/axp20x.c
+@@ -245,6 +245,11 @@ static const struct resource axp803_pek_resources[] = {
+ 	DEFINE_RES_IRQ_NAMED(AXP803_IRQ_PEK_FAL_EDGE, "PEK_DBF"),
+ };
+ 
++static struct resource axp313a_pek_resources[] = {
++	DEFINE_RES_IRQ_NAMED(AXP313A_IRQ_PEK_RIS_EDGE, "PEK_DBR"),
++	DEFINE_RES_IRQ_NAMED(AXP313A_IRQ_PEK_FAL_EDGE, "PEK_DBF"),
++};
++
+ static const struct resource axp806_pek_resources[] = {
+ 	DEFINE_RES_IRQ_NAMED(AXP806_IRQ_POK_RISE, "PEK_DBR"),
+ 	DEFINE_RES_IRQ_NAMED(AXP806_IRQ_POK_FALL, "PEK_DBF"),
+@@ -595,6 +600,7 @@ static const struct regmap_irq_chip axp313a_regmap_irq_chip = {
+ 	.status_base		= AXP313A_IRQ_STATE,
+ 	.ack_base		= AXP313A_IRQ_STATE,
+ 	.unmask_base		= AXP313A_IRQ_EN,
++	.mask_invert		= true,
+ 	.init_ack_masked	= true,
+ 	.irqs			= axp313a_regmap_irqs,
+ 	.num_irqs		= ARRAY_SIZE(axp313a_regmap_irqs),
+@@ -733,6 +739,16 @@ static const struct mfd_cell axp152_cells[] = {
+ };
+ 
+ static struct mfd_cell axp313a_cells[] = {
++	{
++		.name           = "axp221-pek",
++		.num_resources  = ARRAY_SIZE(axp313a_pek_resources),
++		.resources      = axp313a_pek_resources,
++	}, {
++		.name = "axp20x-regulator",
++	},
++};
++
++static struct mfd_cell axp313a_cells_noirq[] = {
+ 	{
+ 		.name = "axp20x-regulator",
+ 	},
+@@ -893,7 +909,11 @@ static void axp20x_power_off(void)
+ 	if (axp20x_pm_power_off->variant == AXP288_ID)
+ 		return;
+ 
+-	regmap_write(axp20x_pm_power_off->regmap, AXP20X_OFF_CTRL,
++	if (axp20x_pm_power_off->variant == AXP313A_ID)
++		regmap_write(axp20x_pm_power_off->regmap, AXP313A_POWER_STATUS,
++		     AXP20X_OFF);
++	else
++		regmap_write(axp20x_pm_power_off->regmap, AXP20X_OFF_CTRL,
+ 		     AXP20X_OFF);
+ 
+ 	/* Give capacitors etc. time to drain to avoid kernel panic msg. */
+@@ -956,8 +976,13 @@ int axp20x_match_device(struct axp20x_dev *axp20x)
+ 		axp20x->irq_flags = IRQF_TRIGGER_LOW;
+ 		break;
+ 	case AXP313A_ID:
+-		axp20x->nr_cells = ARRAY_SIZE(axp313a_cells);
+-		axp20x->cells = axp313a_cells;
++                if (axp20x->irq > 0) {
++			axp20x->nr_cells = ARRAY_SIZE(axp313a_cells);
++			axp20x->cells = axp313a_cells;
++		} else {
++			axp20x->nr_cells = ARRAY_SIZE(axp313a_cells_noirq);
++			axp20x->cells = axp313a_cells_noirq;
++		}
+ 		axp20x->regmap_cfg = &axp313a_regmap_config;
+ 		axp20x->regmap_irq_chip = &axp313a_regmap_irq_chip;
+ 		break;
+@@ -1070,6 +1095,9 @@ int axp20x_device_probe(struct axp20x_dev *axp20x)
+ 		return ret;
+ 	}
+ 
++	if (axp20x->variant == AXP313A_ID)
++		pm_power_off = NULL;
++
+ 	if (!pm_power_off) {
+ 		axp20x_pm_power_off = axp20x;
+ 		pm_power_off = axp20x_power_off;
+diff --git a/include/linux/mfd/axp20x.h b/include/linux/mfd/axp20x.h
+index 78fa5b2b2010..0e2c2ce192b0 100644
+--- a/include/linux/mfd/axp20x.h
++++ b/include/linux/mfd/axp20x.h
+@@ -99,6 +99,8 @@ enum axp20x_variants {
+ #define AXP313A_DCDC3_CONRTOL		0x15
+ #define AXP313A_ALDO1_CONRTOL		0x16
+ #define AXP313A_DLDO1_CONRTOL		0x17
++#define AXP313A_POWER_STATUS		0x1a
++#define AXP313A_PWROK_SET		0x1b
+ #define AXP313A_OUTPUT_MONITOR		0x1d
+ #define AXP313A_IRQ_EN			0x20
+ #define AXP313A_IRQ_STATE		0x21
+-- 
+2.39.5
+

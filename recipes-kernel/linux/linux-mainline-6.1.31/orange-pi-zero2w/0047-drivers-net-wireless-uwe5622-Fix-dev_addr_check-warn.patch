@@ -1,0 +1,25 @@
+From f23614d875ba18f7eb5d4818fd0e92f9e536a99f Mon Sep 17 00:00:00 2001
+From: orangepi-xunlong <258384131@qq.com>
+Date: Tue, 13 Jun 2023 20:29:35 +0800
+Subject: [PATCH 47/57] drivers: net: wireless: uwe5622: Fix dev_addr_check()
+ warning
+
+---
+ drivers/net/wireless/uwe5622/unisocwifi/main.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/net/wireless/uwe5622/unisocwifi/main.c b/drivers/net/wireless/uwe5622/unisocwifi/main.c
+index 46b9039519cd..088a20e8b371 100644
+--- a/drivers/net/wireless/uwe5622/unisocwifi/main.c
++++ b/drivers/net/wireless/uwe5622/unisocwifi/main.c
+@@ -1445,6 +1445,7 @@ static struct sprdwl_vif *sprdwl_register_netdev(struct sprdwl_priv *priv,
+ 	SET_NETDEV_DEV(ndev, wiphy_dev(priv->wiphy));
+ 
+ 	sprdwl_set_mac_addr(vif, addr, ndev->dev_addr);
++	ether_addr_copy(ndev->dev_addr_shadow, ndev->dev_addr);
+ 
+ #ifdef CONFIG_P2P_INTF
+ 	if (type == NL80211_IFTYPE_P2P_DEVICE)
+-- 
+2.39.5
+
