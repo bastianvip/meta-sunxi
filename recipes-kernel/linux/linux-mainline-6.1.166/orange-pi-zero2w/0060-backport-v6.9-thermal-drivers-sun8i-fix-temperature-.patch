@@ -1,7 +1,7 @@
-From 0de22b96f3f9dd963a11d946190f619c8daf4c38 Mon Sep 17 00:00:00 2001
+From 0751cdd1540ed0e57a7d680908a8dedd52ef83c6 Mon Sep 17 00:00:00 2001
 From: Bastian Cieslik <bastiancieslik@web.de>
 Date: Sun, 9 Mar 2025 14:11:12 +0100
-Subject: [PATCH 1/2] backport-v6.9: thermal/drivers/sun8i: fix temperature
+Subject: [PATCH] backport-v6.9: thermal/drivers/sun8i: fix temperature
  readings
 
 mainline commits:
@@ -104,7 +104,7 @@ index 69c2685a2..5e6c79fec 100644
  
  static int __init sunxi_sram_probe(struct platform_device *pdev)
 diff --git a/drivers/thermal/sun8i_thermal.c b/drivers/thermal/sun8i_thermal.c
-index c7f5d6a42..a5449e1c2 100644
+index ca059c060..5d40b849d 100644
 --- a/drivers/thermal/sun8i_thermal.c
 +++ b/drivers/thermal/sun8i_thermal.c
 @@ -15,6 +15,7 @@
@@ -140,8 +140,8 @@ index c7f5d6a42..a5449e1c2 100644
  /* Temp Unit: millidegree Celsius */
  static int sun8i_ths_calc_temp(struct ths_device *tmdev,
  			       int id, int reg)
-@@ -383,6 +389,34 @@ static int sun8i_ths_calibrate(struct ths_device *tmdev)
- 	return ret;
+@@ -388,6 +394,34 @@ static void sun8i_ths_reset_control_assert(void *data)
+ 	reset_control_assert(data);
  }
  
 +static struct regmap *sun8i_ths_get_sram_regmap(struct device_node *node)
@@ -175,9 +175,9 @@ index c7f5d6a42..a5449e1c2 100644
  static int sun8i_ths_resource_init(struct ths_device *tmdev)
  {
  	struct device *dev = tmdev->dev;
-@@ -430,6 +464,25 @@ static int sun8i_ths_resource_init(struct ths_device *tmdev)
+@@ -432,6 +466,25 @@ static int sun8i_ths_resource_init(struct ths_device *tmdev)
  	if (ret)
- 		goto bus_disable;
+ 		return ret;
  
 +  if (tmdev->chip->needs_sram) {
 +    struct regmap *regmap;
@@ -186,7 +186,7 @@ index c7f5d6a42..a5449e1c2 100644
 +    if (IS_ERR(regmap)) {
 +      ret = PTR_ERR(regmap);
 +      dev_err(dev, "failed to get sram regmap %d\n", ret);
-+      goto mod_disable;
++      return ret;
 +    }
 +    tmdev->sram_regmap_field = devm_regmap_field_alloc(dev,
 +                  regmap,
@@ -194,14 +194,14 @@ index c7f5d6a42..a5449e1c2 100644
 +    if (IS_ERR(tmdev->sram_regmap_field)) {
 +      ret = PTR_ERR(tmdev->sram_regmap_field);
 +      dev_err(dev, "failed to alloc regmap field %d\n", ret);
-+      goto mod_disable;
++      return ret;
 +    }
 +  }
 +
  	ret = sun8i_ths_calibrate(tmdev);
  	if (ret)
- 		goto mod_disable;
-@@ -528,6 +581,12 @@ static int sun50i_h616_thermal_init(struct ths_device *tmdev)
+ 		return ret;
+@@ -521,6 +574,12 @@ static int sun50i_h616_thermal_init(struct ths_device *tmdev)
  {
  	int val;
  
@@ -214,7 +214,7 @@ index c7f5d6a42..a5449e1c2 100644
  	/*
  	 * For sun50iw9p1:
  	 * It is necessary that reg[0x03000000] bit[16] is 0.
-@@ -719,6 +778,7 @@ static const struct ths_thermal_chip sun50i_h6_ths = {
+@@ -701,6 +760,7 @@ static const struct ths_thermal_chip sun50i_h6_ths = {
  static const struct ths_thermal_chip sun50i_h616_ths = {
  	.sensor_num = 4,
  	.has_bus_clk_reset = true,
@@ -223,5 +223,5 @@ index c7f5d6a42..a5449e1c2 100644
  	.offset = -3255,
  	.scale = -81,
 -- 
-2.39.5
+2.47.3
 

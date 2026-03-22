@@ -67,4 +67,4 @@ SRC_URI:append:orange-pi-zero2w = " \
             file://0061-fix-Waiting-for-rootfs-on-dev-mmcblk0p1.patch \
 "
 
-SRC_URI[sha256sum] = "e86917bba1990e967943645484182a64ba325f98b114a1906cc1d50992e073c1"
+SRC_URI[sha256sum] = "818dfc742158d18f70a6abccd77b7e4366cb7f26a88687f94dae392a9f089449"
